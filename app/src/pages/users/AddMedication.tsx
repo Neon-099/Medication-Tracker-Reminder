@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMedications, Medication } from '../../context/MedicationContext';
+import { useMedications, type Medication } from '../../context/MedicationContext.tsx';
 
 const AddMedication = () => {
   const navigate = useNavigate();
