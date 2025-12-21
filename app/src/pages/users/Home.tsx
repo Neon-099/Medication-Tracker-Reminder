@@ -1,229 +1,132 @@
-import { useState } from 'react';
+import { useMedications} from '../../context/MedicationContext';
 import { Link } from 'react-router-dom';
-
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  scheduledTime: string;
-  status: 'taken' | 'upcoming' | 'missed';
-  riskLevel: 'low' | 'medium' | 'high';
-}
+import MedicationCard from '../../components/user/MedicationCard';
+import RoundedProgress from '../../components/RoundedProgress';
 
 const Home = () => {
-  const [medications] = useState<Medication[]>([
-    {
-      id: '1',
-      name: 'Lisinopril',
-      dosage: '10mg',
-      scheduledTime: '8:00 AM',
-      status: 'taken',
-      riskLevel: 'medium',
-    },
-    {
-      id: '2',
-      name: 'Metformin',
-      dosage: '500mg',
-      scheduledTime: '9:00 AM',
-      status: 'upcoming',
-      riskLevel: 'low',
-    },
-    {
-      id: '3',
-      name: 'Atorvastatin',
-      dosage: '20mg',
-      scheduledTime: '7:00 AM',
-      status: 'missed',
-      riskLevel: 'high',
-    },
-  ]);
+  const { getWeeklyAdherence ,getTodayMedications, getMedicationStatus } = useMedications();
+  const medications = getTodayMedications();
+  
 
-  const weeklyAdherence = 87;
+  const weeklyAdherence = getWeeklyAdherence();
   const today = new Date();
-  const upcomingCount = medications.filter(m => m.status === 'upcoming').length;
-  const missedCount = medications.filter(m => m.status === 'missed').length;
+  const upcomingCount = medications.filter(m => getMedicationStatus(m) === 'upcoming').length;
+  const missedCount = medications.filter(m => getMedicationStatus(m) === 'missed').length;
+  const takenCount = medications.filter(m => getMedicationStatus(m) === 'taken').length;
 
-  const getStatusIcon = (status: Medication['status']) => {
-    switch (status) {
-      case 'taken':
-        return (
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        );
-      case 'upcoming':
-        return (
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
-            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
-      case 'missed':
-        return (
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100">
-            <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-        );
-    }
-  };
-
-  const getStatusText = (status: Medication['status']) => {
-    switch (status) {
-      case 'taken':
-        return 'Taken';
-      case 'upcoming':
-        return 'Upcoming';
-      case 'missed':
-        return 'Missed';
-    }
-  };
-
-  const getRiskLevelBadge = (riskLevel: Medication['riskLevel']) => {
-    const styles = {
-      low: 'bg-green-50 text-green-700 border-green-200',
-      medium: 'bg-amber-50 text-amber-700 border-amber-200',
-      high: 'bg-orange-50 text-orange-700 border-orange-200',
-    };
-
-    const labels = {
-      low: 'Low Risk',
-      medium: 'Medium Risk',
-      high: 'High Risk',
-    };
-
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[riskLevel]}`}>
-        {labels[riskLevel]}
-      </span>
-    );
-  };
-
-  const upcomingMedications = medications.filter(med => med.status === 'upcoming');
+  const upcomingMedications = medications.filter(med => getMedicationStatus(med) === 'upcoming');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-emerald-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-blue-100 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+      <header className="bg-white/80 backdrop-blur-lg shadow-md border-b border-indigo-100/50 sticky top-0 z-50">
+        <div className="max-w-5xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-blue-700">MedTrack+</h1>
-              <p className="text-sm text-gray-600 mt-1">Your medication, safely on track</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                  MedTrack+
+                </h1>
+                <p className="text-sm text-gray-600 mt-0.5">Your medication, safely on track</p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-lg font-semibold text-gray-800">
+            <div className="text-right bg-gradient-to-br from-indigo-50 to-blue-50 px-4 py-2.5 rounded-xl border border-indigo-100">
+              <p className="text-base font-semibold text-gray-800">
                 {today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
-              <p className="text-sm text-gray-500">{today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-sm text-gray-600 font-medium">{today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
         {/* Quick Status Summary */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl p-4 shadow-md border border-blue-100 text-center">
-            <p className="text-2xl font-bold text-blue-600">{upcomingCount}</p>
-            <p className="text-sm text-gray-600 mt-1">Upcoming</p>
+        <div className="grid grid-cols-3 gap-5">
+          <div className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-lg shadow-blue-100/50 border border-blue-100/50 text-center hover:shadow-xl hover:shadow-blue-200/50 transition-all duration-300 hover:-translate-y-1">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-md">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-3xl font-bold text-blue-600 mb-1">{upcomingCount}</p>
+            <p className="text-sm font-medium text-gray-600">Upcoming</p>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-green-100 text-center">
-            <p className="text-2xl font-bold text-green-600">
-              {medications.filter(m => m.status === 'taken').length}
-            </p>
-            <p className="text-sm text-gray-600 mt-1">Taken</p>
+          <div className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-lg shadow-green-100/50 border border-green-100/50 text-center hover:shadow-xl hover:shadow-green-200/50 transition-all duration-300 hover:-translate-y-1">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-md">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-3xl font-bold text-green-600 mb-1">{takenCount}</p>
+            <p className="text-sm font-medium text-gray-600">Taken</p>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md border border-amber-100 text-center">
-            <p className="text-2xl font-bold text-amber-600">{missedCount}</p>
-            <p className="text-sm text-gray-600 mt-1">Missed</p>
+          <div className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-lg shadow-amber-100/50 border border-amber-100/50 text-center hover:shadow-xl hover:shadow-amber-200/50 transition-all duration-300 hover:-translate-y-1">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <p className="text-3xl font-bold text-amber-600 mb-1">{missedCount}</p>
+            <p className="text-sm font-medium text-gray-600">Missed</p>
           </div>
         </div>
 
         {/* Today's Medication Status - Primary Focus */}
-        <section className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-blue-100">
+        <section className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl shadow-indigo-100/50 p-6 md:p-8 border border-indigo-100/50">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">What do I need to take today?</h2>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Today's Medications</h2>
+              <p className="text-sm text-gray-600">What do you need to take today?</p>
+            </div>
             {upcomingCount > 0 && (
-              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg shadow-blue-200/50">
                 {upcomingCount} remaining
               </span>
             )}
           </div>
           
           {medications.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No medications scheduled for today.</p>
-              <Link to="/medications/add" className="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
+            <div className="text-center py-16">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-lg font-medium mb-2">No medications scheduled for today.</p>
+              <Link to="/medications/add" className="mt-4 inline-block bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95">
                 Add Medication
               </Link>
             </div>
           ) : (
             <>
-              <div className="space-y-3">
-                {medications.map((medication) => (
-                  <div
-                    key={medication.id}
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
-                      medication.status === 'taken'
-                        ? 'border-green-200 bg-green-50'
-                        : medication.status === 'upcoming'
-                        ? 'border-blue-200 bg-blue-50 hover:border-blue-300'
-                        : 'border-amber-200 bg-amber-50'
-                    }`}
-                  >
-                    {getStatusIcon(medication.status)}
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-                        <h3 className="text-lg md:text-xl font-semibold text-gray-800">{medication.name}</h3>
-                        <span className={`text-sm font-medium whitespace-nowrap ${
-                          medication.status === 'taken' ? 'text-green-600' :
-                          medication.status === 'upcoming' ? 'text-blue-600' :
-                          'text-amber-600'
-                        }`}>
-                          {getStatusText(medication.status)}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 text-gray-600 flex-wrap">
-                        <span className="text-sm md:text-base font-medium">{medication.dosage}</span>
-                        <span className="text-gray-400">•</span>
-                        <span className="text-sm md:text-base">{medication.scheduledTime}</span>
-                        <span className="text-gray-400">•</span>
-                        {getRiskLevelBadge(medication.riskLevel)}
-                      </div>
-                    </div>
-
-                    {medication.status === 'upcoming' && (
-                      <Link
-                        to={`/medications/${medication.id}`}
-                        className="text-blue-600 hover:text-blue-700"
-                        aria-label="View details"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </Link>
-                    )}
-                  </div>
-                ))}
+              <div className="space-y-4">
+                {medications.map((medication) => {
+                  const status = getMedicationStatus(medication);
+                  return (
+                    <MedicationCard
+                      id={medication.id} 
+                      medication={medication}
+                      status={status} />
+                  );
+                })}
               </div>
 
               {/* Primary Action Buttons */}
               {upcomingMedications.length > 0 && (
-                <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                  <button className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-6 rounded-xl text-base md:text-lg transition-colors shadow-md hover:shadow-lg active:scale-95">
-                    Mark as Taken
-                  </button>
+                <div className="mt-8 flex flex-col sm:flex-row gap-4">
                   <Link
                     to="/medications"
-                    className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold py-4 px-6 rounded-xl text-base md:text-lg transition-colors text-center"
+                    className="flex-1 bg-white hover:bg-gray-50 text-indigo-700 font-bold py-4 px-6 rounded-xl text-base md:text-lg transition-all shadow-md hover:shadow-lg border-2 border-indigo-200 text-center flex items-center justify-center gap-2"
                   >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
                     View All Medications
                   </Link>
                 </div>
@@ -233,67 +136,19 @@ const Home = () => {
         </section>
 
         {/* Adherence Summary Section */}
-        <section className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-green-100">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Weekly Adherence</h2>
-            <Link to="/compliance" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-              View Details →
-            </Link>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-            {/* Progress Ring */}
-            <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
-              <svg className="transform -rotate-90 w-full h-full">
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="45%"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  className="text-gray-200"
-                />
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="45%"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 45}`}
-                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - weeklyAdherence / 100)}`}
-                  className="text-green-500 transition-all duration-500"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl sm:text-3xl font-bold text-gray-800">{weeklyAdherence}%</span>
-              </div>
-            </div>
-            
-            <div className="flex-1 text-center sm:text-left">
-              <p className="text-lg sm:text-xl text-gray-700 mb-2 font-medium">
-                You're doing great this week!
-              </p>
-              <p className="text-sm sm:text-base text-gray-600">
-                Keep up the excellent work with your medication schedule. Consistency is key to maintaining your health.
-              </p>
-            </div>
-          </div>
-        </section>
+        <RoundedProgress />
 
         {/* Safety & Trust Section */}
-        <section className="bg-blue-50 rounded-2xl shadow-md p-5 md:p-6 border border-blue-100">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <section className="bg-gradient-to-br from-indigo-50/80 to-blue-50/80 backdrop-blur-sm rounded-3xl shadow-lg p-6 md:p-7 border border-indigo-100/50">
+          <div className="flex items-start gap-5">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400 to-blue-600 flex items-center justify-center shadow-lg">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <div>
-              <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-2">Your Data is Secure</h3>
-              <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
+              <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-2">Your Data is Secure</h3>
+              <p className="text-sm md:text-base text-gray-700 leading-relaxed">
                 All your medication information is stored securely and encrypted. This app is designed to help you track your medications and does not replace professional medical advice. Always consult with your healthcare provider about your treatment plan.
               </p>
             </div>
