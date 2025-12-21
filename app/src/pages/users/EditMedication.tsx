@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useMedications, Medication } from '../../context/MedicationContext';
+import { useMedications, type Medication } from '../../context/MedicationContext';
 
 const EditMedication = () => {
   const { id } = useParams<{ id: string }>();

@@ -148,7 +148,7 @@ const AddMedication = () => {
                     Dosage *
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     value={formData.dosage || ''}
                     onChange={(e) => {
                       setFormData({ ...formData, dosage: e.target.value });
