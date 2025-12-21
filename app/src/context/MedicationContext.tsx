@@ -34,6 +34,10 @@ interface MedicationContextType {
   markAsTaken: (id: string, time?: string) => void;
   getMedicationStatus: (medication: Medication) => 'taken' | 'upcoming' | 'missed';
   getTodayLogs: (medicationId: string) => MedicationLog[];
+  getWeeklyAdherence: () => number;
+  getMonthlyAdherence: () => number;
+  getAdherenceByDateRange: (startDate: Date, endDate: Date) => number;
+  getDailyAdherenceData: (days: number) => Array<{ date: string; adherence: number; taken: number; total: number }>;
 }
 
 const MedicationContext = createContext<MedicationContextType | undefined>(undefined);
@@ -54,34 +58,9 @@ export const MedicationProvider = ({ children }: { children: ReactNode }) => {
     // Default medications
     return [
       {
-        id: '1',
-        name: 'Lisinopril',
-        dosage: '10mg',
-        scheduledTime: '08:00',
-        frequency: 'once',
-        riskLevel: 'medium',
-        status: 'active',
-        instructions: 'Take with food',
-        startDate: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        name: 'Metformin',
-        dosage: '500mg',
-        scheduledTime: '09:00',
-        frequency: 'twice',
-        riskLevel: 'low',
-        status: 'active',
-        startDate: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
         id: '3',
         name: 'Atorvastatin',
-        dosage: '20mg',
+        dosage: '20',
         scheduledTime: '07:00',
         frequency: 'once',
         riskLevel: 'high',
@@ -114,6 +93,122 @@ export const MedicationProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
   }, [logs]);
+
+
+  const getWeeklyAdherence = (): number => {
+    const today = new Date();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - 6);
+    weekStart.setHours(0, 0, 0, 0);
+
+    return getAdherenceByDateRange(weekStart, today);
+  }
+
+  const getMonthlyAdherence = (): number => {
+    const today = new Date();
+    const monthStart = new Date(today);
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    return getAdherenceByDateRange(monthStart, today);
+  }
+  
+
+  const getAdherenceByDateRange = (startDate: Date, endDate: Date): number => {
+    const activeMedications = medications.filter(med => med.status === 'active');
+    
+    if (activeMedications.length === 0) return 100; // No medications = perfect adherence
+    
+    let totalExpected = 0;
+    let totalTaken = 0;
+    
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const dateStr = currentDate.toDateString();
+      
+      activeMedications.forEach(med => {
+        const medStartDate = new Date(med.startDate);
+        medStartDate.setHours(0, 0, 0, 0);
+        
+        const medEndDate = med.endDate ? new Date(med.endDate) : null;
+        if (medEndDate) medEndDate.setHours(0, 0, 0, 0);
+        
+        // Check if medication was active on this date
+        if (currentDate >= medStartDate && (!medEndDate || currentDate <= medEndDate)) {
+          totalExpected++;
+          
+          // Check if there's a log for this medication on this date
+          const hasLog = logs.some(log => {
+            const logDate = new Date(log.takenAt);
+            logDate.setHours(0, 0, 0, 0);
+            return (
+              log.medicationId === med.id &&
+              logDate.getTime() === currentDate.getTime() &&
+              log.status === 'taken'
+            );
+          });
+          
+          if (hasLog) {
+            totalTaken++;
+          }
+        }
+      });
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    if (totalExpected === 0) return 100;
+    return Math.round((totalTaken / totalExpected) * 100);
+  };
+
+  const getDailyAdherenceData = (days: number): Array<{ date: string; adherence: number; taken: number; total: number }> => {
+    const today = new Date();
+    const data: Array<{ date: string; adherence: number; taken: number; total: number }> = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      
+      const dateStr = date.toDateString();
+      const activeMedications = medications.filter(med => {
+        if (med.status !== 'active') return false;
+        const medStartDate = new Date(med.startDate);
+        medStartDate.setHours(0, 0, 0, 0);
+        const medEndDate = med.endDate ? new Date(med.endDate) : null;
+        if (medEndDate) medEndDate.setHours(0, 0, 0, 0);
+        return date >= medStartDate && (!medEndDate || date <= medEndDate);
+      });
+      
+      let total = activeMedications.length;
+      let taken = 0;
+      
+      activeMedications.forEach(med => {
+        const hasLog = logs.some(log => {
+          const logDate = new Date(log.takenAt);
+          logDate.setHours(0, 0, 0, 0);
+          return (
+            log.medicationId === med.id &&
+            logDate.getTime() === date.getTime() &&
+            log.status === 'taken'
+          );
+        });
+        if (hasLog) taken++;
+      });
+      
+      const adherence = total === 0 ? 100 : Math.round((taken / total) * 100);
+      
+      data.push({
+        date: dateStr,
+        adherence,
+        taken,
+        total
+      });
+    }
+    
+    return data;
+  };
 
   const addMedication = (medication: Omit<Medication, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newMedication: Medication = {
@@ -188,7 +283,6 @@ export const MedicationProvider = ({ children }: { children: ReactNode }) => {
     
     // Check if there's a log for this scheduled time today
     const takenToday = todayLogs.some((log) => {
-      const logTime = new Date(log.takenAt);
       return log.scheduledTime === scheduledTime;
     });
     
@@ -196,12 +290,20 @@ export const MedicationProvider = ({ children }: { children: ReactNode }) => {
       return 'taken';
     }
     
+    //CHECK IF MEDICATION WAS CREATED TODAY
+    const createdToday = new Date(medication.createdAt).toDateString() === today;
+
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
     const scheduledTimeMinutes = hours * 60 + minutes;
     
     // If scheduled time has passed (with 30 min grace period)
     if (currentTime > scheduledTimeMinutes + 30) {
+      
+      if(createdToday){
+        return 'upcoming';
+      }
+      
       return 'missed';
     }
     
@@ -237,6 +339,10 @@ export const MedicationProvider = ({ children }: { children: ReactNode }) => {
         markAsTaken,
         getMedicationStatus,
         getTodayLogs,
+        getDailyAdherenceData,
+        getMonthlyAdherence,
+        getWeeklyAdherence,
+        getAdherenceByDateRange,
       }}
     >
       {children}
