@@ -7,7 +7,7 @@ import RoundedProgress from '../../components/user/RoundedProgress';
 const Home = () => {
   const { getWeeklyAdherence ,getTodayMedications, getMedicationStatus } = useMedications();
   const medications = getTodayMedications();
-  const [showTaken, setShowTaken] = useState(false);
+  const [showTakenModal, setShowTakenModal] = useState(false);
 
   const weeklyAdherence = getWeeklyAdherence();
   const today = new Date();
@@ -65,7 +65,10 @@ const Home = () => {
             <p className="text-3xl font-bold text-blue-600 mb-1">{upcomingCount}</p>
             <p className="text-sm font-medium text-gray-600">Upcoming</p>
           </div>
-          <div className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-lg shadow-green-100/50 border border-green-100/50 text-center hover:shadow-xl hover:shadow-green-200/50 transition-all duration-300 hover:-translate-y-1">
+          <div 
+            className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-lg shadow-green-100/50 border border-green-100/50 text-center hover:shadow-xl hover:shadow-green-200/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+            onClick={() => takenCount > 0 && setShowTakenModal(true)}
+          >
             <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-md">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -130,63 +133,37 @@ const Home = () => {
                 </div>
               )}
 
-              {/* Taken Medications Section (Collapsible) */}
+              {/* Taken Medications Button */}
               {takenMedications.length > 0 && (
                 <div className="border-t border-gray-200 pt-6 mt-6">
                   <button
-                    onClick={() => setShowTaken(!showTaken)}
-                    className="flex items-center justify-between w-full mb-4 text-left"
+                    onClick={() => setShowTakenModal(true)}
+                    className="flex items-center justify-between w-full p-4 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-xl border-2 border-green-200 transition-all hover:shadow-md group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-800">Taken Medications</h3>
+                      <div className="text-left">
+                        <h3 className="text-lg font-semibold text-gray-800">View Taken Medications</h3>
                         <p className="text-sm text-gray-600">{takenMedications.length} medication{takenMedications.length !== 1 ? 's' : ''} completed today</p>
                       </div>
                     </div>
                     <svg 
-                      className={`w-5 h-5 text-gray-600 transition-transform ${showTaken ? 'rotate-180' : ''}`}
+                      className="w-6 h-6 text-gray-600 group-hover:text-green-600 transition-colors"
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
-
-                  {showTaken && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                      {takenMedications.map((medication) => (
-                        <MedicationCard
-                          key={medication.id}
-                          id={medication.id} 
-                          medication={medication}
-                          status="taken" 
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
               )}
 
               {/* Primary Action Buttons */}
-              {priorityMedications.length > 0 && (
-                <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                  <Link
-                    to="/medications"
-                    className="flex-1 bg-white hover:bg-gray-50 text-indigo-700 font-bold py-4 px-6 rounded-xl text-base md:text-lg transition-all shadow-md hover:shadow-lg border-2 border-indigo-200 text-center flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                    View All Medications
-                  </Link>
-                </div>
-              )}
             </>
           )}
         </section>
@@ -211,6 +188,78 @@ const Home = () => {
           </div>
         </section>
       </main>
+
+      {/* Taken Medications Modal */}
+      {showTakenModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowTakenModal(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-green-200 animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-md">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Taken Medications</h2>
+                  <p className="text-sm text-gray-600">{takenMedications.length} medication{takenMedications.length !== 1 ? 's' : ''} completed today</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTakenModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            {takenMedications.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  </svg>
+                </div>
+                <p className="text-gray-500 text-lg font-medium">No medications taken yet today</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {takenMedications.map((medication) => (
+                  <MedicationCard
+                    key={medication.id}
+                    id={medication.id} 
+                    medication={medication}
+                    status="taken" 
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Modal Footer */}
+             <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                  <Link
+                    to="/medications"
+                    className="flex-1 bg-white hover:bg-gray-50 text-indigo-700 font-bold py-4 px-6 rounded-xl text-base md:text-lg transition-all shadow-md hover:shadow-lg border-2 border-indigo-200 text-center flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    View All Medications
+                  </Link>
+                </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
