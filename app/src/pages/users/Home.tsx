@@ -1,20 +1,28 @@
+import { useState } from 'react';
 import { useMedications} from '../../context/MedicationContext';
 import { Link } from 'react-router-dom';
 import MedicationCard from '../../components/user/MedicationCard';
-import RoundedProgress from '../../components/RoundedProgress';
+import RoundedProgress from '../../components/user/RoundedProgress';
 
 const Home = () => {
   const { getWeeklyAdherence ,getTodayMedications, getMedicationStatus } = useMedications();
   const medications = getTodayMedications();
-  
+  const [showTaken, setShowTaken] = useState(false);
 
   const weeklyAdherence = getWeeklyAdherence();
   const today = new Date();
-  const upcomingCount = medications.filter(m => getMedicationStatus(m) === 'upcoming').length;
-  const missedCount = medications.filter(m => getMedicationStatus(m) === 'missed').length;
-  const takenCount = medications.filter(m => getMedicationStatus(m) === 'taken').length;
+  
+  // Separate medications by status
+  const upcomingMedications = medications.filter(m => getMedicationStatus(m) === 'upcoming');
+  const missedMedications = medications.filter(m => getMedicationStatus(m) === 'missed');
+  const takenMedications = medications.filter(m => getMedicationStatus(m) === 'taken');
+  
+  const upcomingCount = upcomingMedications.length;
+  const missedCount = missedMedications.length;
+  const takenCount = takenMedications.length;
 
-  const upcomingMedications = medications.filter(med => getMedicationStatus(med) === 'upcoming');
+  // Combine upcoming and missed for display (priority medications)
+  const priorityMedications = [...upcomingMedications, ...missedMedications];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-emerald-50">
@@ -105,20 +113,68 @@ const Home = () => {
             </div>
           ) : (
             <>
-              <div className="space-y-4">
-                {medications.map((medication) => {
-                  const status = getMedicationStatus(medication);
-                  return (
-                    <MedicationCard
-                      id={medication.id} 
-                      medication={medication}
-                      status={status} />
-                  );
-                })}
-              </div>
+              {/* Priority Medications (Upcoming & Missed) */}
+              {priorityMedications.length > 0 && (
+                <div className="space-y-4 mb-6">
+                  {priorityMedications.map((medication) => {
+                    const status = getMedicationStatus(medication);
+                    return (
+                      <MedicationCard
+                        key={medication.id}
+                        id={medication.id} 
+                        medication={medication}
+                        status={status} 
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Taken Medications Section (Collapsible) */}
+              {takenMedications.length > 0 && (
+                <div className="border-t border-gray-200 pt-6 mt-6">
+                  <button
+                    onClick={() => setShowTaken(!showTaken)}
+                    className="flex items-center justify-between w-full mb-4 text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">Taken Medications</h3>
+                        <p className="text-sm text-gray-600">{takenMedications.length} medication{takenMedications.length !== 1 ? 's' : ''} completed today</p>
+                      </div>
+                    </div>
+                    <svg 
+                      className={`w-5 h-5 text-gray-600 transition-transform ${showTaken ? 'rotate-180' : ''}`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {showTaken && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {takenMedications.map((medication) => (
+                        <MedicationCard
+                          key={medication.id}
+                          id={medication.id} 
+                          medication={medication}
+                          status="taken" 
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Primary Action Buttons */}
-              {upcomingMedications.length > 0 && (
+              {priorityMedications.length > 0 && (
                 <div className="mt-8 flex flex-col sm:flex-row gap-4">
                   <Link
                     to="/medications"
