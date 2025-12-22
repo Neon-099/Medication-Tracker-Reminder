@@ -1,1 +1,51 @@
+
+/* Font size settings */
+body.font-normal {
+  font-size: 1rem;
+}
+
+.font-normal h1 {
+  font-size: 1.5rem;
+}
+
+.font-normal h2 {
+  font-size: 1.25rem;
+}
+
+.font-normal h3 {
+  font-size: 1.125rem;
+}
+
+.font-large {
+  font-size: 1.125rem;
+}
+
+.font-large h1 {
+  font-size: 1.875rem;
+}
+
+.font-large h2 {
+  font-size: 1.5rem;
+}
+
+.font-large h3 {
+  font-size: 1.25rem;
+}
+
+.font-extra-large {
+  font-size: 1.25rem;
+}
+
+.font-extra-large h1 {
+  font-size: 2.25rem;
+}
+
+.font-extra-large h2 {
+  font-size: 1.875rem;
+}
+
+.font-extra-large h3 {
+  font-size: 1.5rem;
+}
+
 @import "tailwindcss"
