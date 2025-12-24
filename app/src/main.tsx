@@ -13,7 +13,7 @@ import MedicationDetails from './pages/users/MedicationDetails'
 import Compliance from './pages/users/Compliance'
 import Alerts from './pages/users/Alerts'
 import Settings from './pages/users/Settings'
-import Navigation from './components/Navigation'
+//import Navigation from './components/Navigation'
 import AlarmNotification from './components/user/AlarmNotification'
 import NotificationPermission from './components/user/NotificationPermission'
 

@@ -7,9 +7,7 @@ const Landing = () => {
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-indigo-100/60">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg">
-              <span className="text-white font-black text-lg tracking-tight">M+</span>
-            </div>
+            <img src="./circleLogo.png" alt="" className='w-15 h-15'/>
             <div>
               <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
                 MedTrack+
@@ -37,7 +35,7 @@ const Landing = () => {
         <section className="grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1.3fr)] gap-10 items-center">
           <div>
             <p className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.26em] text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-3 py-1 mb-5 uppercase">
-              MEDICATION • ROUTINES ��� PEACE OF MIND
+              MEDICATION • ROUTINES: PEACE OF MIND
             </p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-4 text-gray-900">
               Never miss an important dose
