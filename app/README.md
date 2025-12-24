@@ -1,75 +1,88 @@
-# React + TypeScript + Vite
+# 💊 MedTrack+ Medication Tracker & Reminder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🎯 Purpose
 
-Currently, two official plugins are available:
+MedTrack+ is a web-based application designed to **help people stay on top of their medications** with clear schedules, smart reminders, and simple adherence insights.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+It focuses on:
 
-## React Compiler
+- **Patients** → see exactly what to take, when to take it, and avoid missed doses.
+- **Caregivers** → get a clearer picture of someone’s routine and how consistently medications are being taken.
+- **Clinicians & families** → use adherence patterns as a conversation starter, not a judgment.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+---
 
-Note: This will impact Vite dev & build performances.
+## ✨ Features
 
-## Expanding the ESLint configuration
+### 👤 Users / Patients
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Add medications with name, dose, and schedule
+- See **today’s medications** in a clear, prioritized view
+- Mark doses as **upcoming, taken, or missed**
+- Receive reminder alerts when it’s time to take a dose
+- View adherence summaries over time
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 📱 Experience & UI
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Mobile-friendly, card-based interface
+- Gradient, glassmorphism-inspired design
+- Quick-scan action for adding prescriptions faster
+- Sticky header with current date & time
+- Rounded progress visual for adherence
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 🚨 Reminders & Alerts
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- In-app alarm popup when a medication is due
+- Snooze option (e.g., 5 minutes) when life interrupts
+- Browser notifications (where supported and permitted)
+- Audio alarm playback with looping until dismissed
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 📷 Prescription Scanning
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Optional prescription scanning workflow
+- Vision API integration (via `visionApi` + `prescriptionParser` services)
+- Extracts key information from images of prescriptions to speed up medication entry
+
+### ⚙️ Settings & Management
+
+- Manage full medication list
+- Edit existing medications and schedules
+- View and configure alert-related settings
+- Track compliance and past doses
+
+---
+
+## 🔑 Architecture & Logic
+
+- **Medication logic** handled via a shared `MedicationContext`
+- **Settings & preferences** managed with `SettingsContext`
+- Custom hooks for reminder timing and alarm behavior (`useReminderAlarm`)
+- Time-based status calculation for each medication: upcoming, taken, missed
+- Snooze tracking and re-triggering of alarms at the right time
+
+---
+
+## 🏗️ Tech Stack
+
+- **Frontend** → React + TypeScript + Vite
+- **Styling** → Tailwind CSS (utility-first, responsive design)
+- **State Management** → React Context (MedicationContext, SettingsContext)
+- **Routing** → React Router (multi-page user flows: Home, Medications, Alerts, Settings, etc.)
+- **Notifications** → Web Notifications API + custom alarm modal
+- **Vision / Parsing** → Custom services integrating with external Vision/OCR APIs
+
+---
+
+## 🚀 Getting Started (Dev)
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Run the development server:
+   ```bash
+   npm run dev
+   ```
+3. Open the app in your browser (default Vite URL, e.g. `http://localhost:5173`).
+
+From here you can add medications, test reminders, and explore the full MedTrack+ experience.
