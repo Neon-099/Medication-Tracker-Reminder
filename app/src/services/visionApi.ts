@@ -1,10 +1,38 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GROK_API_KEY = import.meta.env.VITE_GROK_API_KEY;
+const GROK_API_KEY = import.meta.env.VITE_GROK_API_KEY  ;
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+// const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`;
+const GEMINI_URL =
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+//const GEMINI_URL =
+  //`https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
 const GROK_URL = 'https://api.x.ai/v1/chat/completions';
 
 const SYSTEM_PROMPT = "Transcribe the text from this prescription label exactly as it appears, line by line. Do not add markdown formatting, explanations, or conversational filler. Just return the raw text found on the label.";
+
+// const SYSTEM_PROMPT = `
+// You are an OCR extraction engine.
+
+// Extract the prescription label and return ONLY valid JSON in this exact shape:
+// {
+//   "patient_name": string | null,
+//   "medication_name": string | null,
+//   "dosage": string | null,
+//   "frequency": string | null,
+//   "prescribing_doctor": string | null,
+//   "pharmacy_name": string | null,
+//   "raw_text": string
+// }
+
+// Rules:
+// - Preserve original wording
+// - Do not guess missing fields
+// - Do not add explanations
+// - No markdown
+// `;
+
 
 async function analyzeWithGemini(base64Data: string, mimeType: string): Promise<string> {
   if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
@@ -69,7 +97,13 @@ async function analyzeWithGrok(fullDataUrl: string): Promise<string> {
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || '';
+  const content = data.choices?.[0]?.message?.content;
+
+  if (Array.isArray(content)) {
+    return content.map(c => c.text ?? '').join('');
+  }
+
+  return content ?? '';
 }
 
 export const analyzeImage = async (base64Image: string): Promise<string> => {
