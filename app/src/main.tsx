@@ -5,6 +5,7 @@ import { MedicationProvider } from './context/MedicationContext'
 import { SettingsProvider } from './context/SettingsContext'
 
 import Home from './pages/users/Home'
+import Landing from './pages/Landing'
 import MedicationList from './pages/users/MedicationList';
 import AddMedication from './pages/users/AddMedication'
 import EditMedication from './pages/users/EditMedication'
@@ -17,12 +18,14 @@ import AlarmNotification from './components/user/AlarmNotification'
 import NotificationPermission from './components/user/NotificationPermission'
 
 createRoot(document.getElementById('root')!).render(
+
   <BrowserRouter>
     <SettingsProvider>
       <MedicationProvider>
         <div className="pb-20">
           <Routes>
-            <Route path="/" element={<Home /> }/>
+            <Route path='/' element={<Landing />}/>
+            <Route path='/home' element={<Home />} />
             <Route path='/medications' element={ <MedicationList /> }/>
             <Route path="/medications/add" element={<AddMedication />} />
             <Route path="/medications/:id" element={<MedicationDetails />} />
@@ -32,7 +35,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
-        <Navigation />
+        {/* <Navigation /> */}
         <AlarmNotification />
         <NotificationPermission />
       </MedicationProvider>
