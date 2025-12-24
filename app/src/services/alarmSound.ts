@@ -15,7 +15,7 @@ class AlarmSoundService {
     return this.audioContext;
   }
 
-  private async generateSound(type: string, volume: number): Promise<AudioBuffer> {
+  private async generateSound(type: string, _volume: number): Promise<AudioBuffer> {
     const ctx = this.initAudioContext();
     const sampleRate = ctx.sampleRate;
     const duration = 0.5; // 500ms
