@@ -125,7 +125,6 @@ export const MedicationProvider = ({ children }: { children: ReactNode }) => {
     const currentDate = new Date(startDate);
     
     while (currentDate <= endDate) {
-      const dateStr = currentDate.toDateString();
       
       activeMedications.forEach(med => {
         const medStartDate = new Date(med.startDate);
