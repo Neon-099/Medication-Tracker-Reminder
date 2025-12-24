@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { analyzeImage } from '../../services/visionApi';
+import { analyzeImage } from './visionApi';
 
 const ApiTester = ({ onClose }: { onClose: () => void }) => {
   const [image, setImage] = useState<string | null>(null);
